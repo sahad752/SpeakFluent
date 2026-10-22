@@ -13,11 +13,12 @@ public final class GeminiLLMService: LLMServiceProtocol {
         history: [ConversationTurn],
         userSpeech: String
     ) async throws -> (evaluation: LLMPronunciationEvaluation, replyText: String) {
-        if config.isMockModeEnabled || config.apiKey.isEmpty {
+        let trimmedKey = config.apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        if config.isMockModeEnabled || trimmedKey.isEmpty {
             return generateMockEvaluation(history: history, userSpeech: userSpeech)
         }
 
-        let endpoint = "\(config.customEndpoint)/models/\(config.modelName):generateContent?key=\(config.apiKey)"
+        let endpoint = "\(config.customEndpoint)/models/\(config.modelName):generateContent?key=\(trimmedKey)"
         guard let url = URL(string: endpoint) else {
             throw URLError(.badURL)
         }
@@ -30,9 +31,13 @@ public final class GeminiLLMService: LLMServiceProtocol {
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
 
         let (data, response) = try await urlSession.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            let errorText = String(data: data, encoding: .utf8) ?? "Unknown server response"
-            throw NSError(domain: "GeminiAPI", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: errorText])
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+
+        if httpResponse.statusCode != 200 {
+            let errorMsg = extractErrorMessage(from: data) ?? "Gemini API error (HTTP \(httpResponse.statusCode))"
+            throw NSError(domain: "GeminiAPI", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMsg])
         }
 
         return try parseStructuredResponse(data: data)
@@ -45,12 +50,13 @@ public final class GeminiLLMService: LLMServiceProtocol {
     ) -> AsyncThrowingStream<String, Error> {
         return AsyncThrowingStream { continuation in
             Task {
-                if self.config.isMockModeEnabled || self.config.apiKey.isEmpty {
+                let trimmedKey = self.config.apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+                if self.config.isMockModeEnabled || trimmedKey.isEmpty {
                     // Simulate sub-second token streaming
                     let mockReply = self.generateMockEvaluation(history: history, userSpeech: userSpeech).replyText
                     let words = mockReply.components(separatedBy: " ")
                     for word in words {
-                        try? await Task.sleep(nanoseconds: 60_000_000) // 60ms per word
+                        try? await Task.sleep(nanoseconds: 50_000_000)
                         continuation.yield(word + " ")
                     }
                     continuation.finish()
@@ -58,7 +64,7 @@ public final class GeminiLLMService: LLMServiceProtocol {
                 }
 
                 do {
-                    let endpoint = "\(self.config.customEndpoint)/models/\(self.config.modelName):streamGenerateContent?alt=sse&key=\(self.config.apiKey)"
+                    let endpoint = "\(self.config.customEndpoint)/models/\(self.config.modelName):streamGenerateContent?alt=sse&key=\(trimmedKey)"
                     guard let url = URL(string: endpoint) else {
                         continuation.finish(throwing: URLError(.badURL))
                         return
@@ -94,25 +100,48 @@ public final class GeminiLLMService: LLMServiceProtocol {
         }
     }
 
-    // MARK: - Request Builders
+    // MARK: - Request Builders (Compliant with Gemini Role Alternation)
     private func buildStructuredRequestBody(history: [ConversationTurn], userSpeech: String) -> [String: Any] {
         var contents: [[String: Any]] = []
+        var previousRole: String? = nil
 
+        // Take up to 6 turns and guarantee role alternation starting with 'user'
         for turn in history.suffix(6) {
-            contents.append([
-                "role": turn.speaker == .user ? "user" : "model",
-                "parts": [["text": turn.text]]
-            ])
+            let role = (turn.speaker == .user) ? "user" : "model"
+
+            // Gemini rejects leading 'model' turn
+            if contents.isEmpty && role == "model" {
+                continue
+            }
+
+            if role != previousRole {
+                contents.append([
+                    "role": role,
+                    "parts": [["text": turn.text]]
+                ])
+                previousRole = role
+            }
         }
 
         let userPrompt = """
-        User just spoke: "\(userSpeech)".
-        Evaluate their pronunciation, phonetic clarity, and provide your conversational reply along with an adaptive follow-up prompt in the structured JSON schema.
+        User spoken utterance: "\(userSpeech)".
+        Evaluate their pronunciation accuracy, highlight phonetic mistakes with tips, and provide your natural spoken response along with an adaptive follow-up prompt.
+        Format your response strictly using the provided structured JSON schema.
         """
-        contents.append([
-            "role": "user",
-            "parts": [["text": userPrompt]]
-        ])
+
+        if previousRole == "user" {
+            // Append as an additional part to avoid duplicate consecutive 'user' turns
+            if var last = contents.popLast(), var parts = last["parts"] as? [[String: Any]] {
+                parts.append(["text": userPrompt])
+                last["parts"] = parts
+                contents.append(last)
+            }
+        } else {
+            contents.append([
+                "role": "user",
+                "parts": [["text": userPrompt]]
+            ])
+        }
 
         return [
             "system_instruction": [
@@ -129,16 +158,35 @@ public final class GeminiLLMService: LLMServiceProtocol {
 
     private func buildStreamingRequestBody(history: [ConversationTurn], userSpeech: String) -> [String: Any] {
         var contents: [[String: Any]] = []
+        var previousRole: String? = nil
+
         for turn in history.suffix(6) {
+            let role = (turn.speaker == .user) ? "user" : "model"
+            if contents.isEmpty && role == "model" {
+                continue
+            }
+            if role != previousRole {
+                contents.append([
+                    "role": role,
+                    "parts": [["text": turn.text]]
+                ])
+                previousRole = role
+            }
+        }
+
+        let prompt = "User says: \"\(userSpeech)\". Reply conversationally, concisely, and naturally as an English coach."
+        if previousRole == "user" {
+            if var last = contents.popLast(), var parts = last["parts"] as? [[String: Any]] {
+                parts.append(["text": prompt])
+                last["parts"] = parts
+                contents.append(last)
+            }
+        } else {
             contents.append([
-                "role": turn.speaker == .user ? "user" : "model",
-                "parts": [["text": turn.text]]
+                "role": "user",
+                "parts": [["text": prompt]]
             ])
         }
-        contents.append([
-            "role": "user",
-            "parts": [["text": "User says: \"\(userSpeech)\". Reply conversationally and briefly to keep the conversation going."]]
-        ])
 
         return [
             "system_instruction": ["parts": [["text": LLMConfig.systemInstruction]]],
@@ -147,7 +195,7 @@ public final class GeminiLLMService: LLMServiceProtocol {
         ]
     }
 
-    // MARK: - Parsers
+    // MARK: - Parsers & Error Extraction
     private func parseStructuredResponse(data: Data) throws -> (evaluation: LLMPronunciationEvaluation, replyText: String) {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let candidates = json["candidates"] as? [[String: Any]],
@@ -156,7 +204,8 @@ public final class GeminiLLMService: LLMServiceProtocol {
               let parts = content["parts"] as? [[String: Any]],
               let firstPart = parts.first,
               let text = firstPart["text"] as? String else {
-            throw NSError(domain: "GeminiParser", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to parse candidates JSON"])
+            let errorMsg = extractErrorMessage(from: data) ?? "Failed to parse candidates JSON"
+            throw NSError(domain: "GeminiParser", code: 1, userInfo: [NSLocalizedDescriptionKey: errorMsg])
         }
 
         guard let structuredData = text.data(using: .utf8) else {
@@ -178,6 +227,15 @@ public final class GeminiLLMService: LLMServiceProtocol {
             return nil
         }
         return text
+    }
+
+    private func extractErrorMessage(from data: Data) -> String? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let errorObj = json["error"] as? [String: Any],
+              let message = errorObj["message"] as? String else {
+            return nil
+        }
+        return message
     }
 
     // MARK: - Realistic Mock Evaluation (Zero-Config Demos)

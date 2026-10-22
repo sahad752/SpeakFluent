@@ -360,15 +360,49 @@ private struct LLMSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var apiKey: String = LLMConfig.shared.apiKey
     @State private var isMockMode: Bool = LLMConfig.shared.isMockModeEnabled
+    @State private var isTesting: Bool = false
+    @State private var testResult: String?
+    @State private var isSuccess: Bool = false
 
     var body: some View {
         NavigationStack {
             Form {
-                Section(header: Text("LLM API Configuration"), footer: Text("Enter a Google Gemini API key for live LLM streaming. If empty, the app runs in realistic zero-latency local simulation mode.")) {
+                Section(
+                    header: Text("LLM API Configuration"),
+                    footer: Text("Enter a Google Gemini API key from aistudio.google.com. When a key is saved, Demo Mode is automatically disabled to connect live to Gemini Flash.")
+                ) {
                     SecureField("Gemini API Key", text: $apiKey)
                         .autocorrectionDisabled()
+                        .onChange(of: apiKey) { newKey in
+                            if !newKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                isMockMode = false
+                            }
+                        }
 
                     Toggle("Enable Zero-Latency Demo Mode", isOn: $isMockMode)
+
+                    Button(action: testApiKeyConnection) {
+                        HStack {
+                            if isTesting {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "network")
+                            }
+                            Text(isTesting ? "Testing Connection..." : "Test Gemini API Connection")
+                        }
+                    }
+                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isTesting)
+
+                    if let result = testResult {
+                        HStack(spacing: 6) {
+                            Image(systemName: isSuccess ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                                .foregroundColor(isSuccess ? .green : .red)
+                            Text(result)
+                                .font(.caption)
+                                .foregroundColor(isSuccess ? .green : .red)
+                        }
+                    }
                 }
 
                 Section(header: Text("Pipeline Architecture")) {
@@ -387,10 +421,11 @@ private struct LLMSettingsSheet: View {
                     }
 
                     HStack {
-                        Text("Streaming Protocol")
+                        Text("Mode Status")
                         Spacer()
-                        Text("SSE / WebSockets")
-                            .foregroundColor(.secondary)
+                        Text(isMockMode ? "Offline Demo Mode" : "Live Gemini Cloud")
+                            .fontWeight(.semibold)
+                            .foregroundColor(isMockMode ? .orange : .green)
                     }
                 }
             }
@@ -400,11 +435,72 @@ private struct LLMSettingsSheet: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         var conf = LLMConfig.shared
-                        conf.apiKey = apiKey
-                        conf.isMockModeEnabled = isMockMode
+                        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+                        conf.apiKey = trimmed
+                        if trimmed.isEmpty {
+                            conf.isMockModeEnabled = true
+                        } else {
+                            conf.isMockModeEnabled = isMockMode
+                        }
                         dismiss()
                     }
                     .fontWeight(.bold)
+                }
+            }
+        }
+    }
+
+    private func testApiKeyConnection() {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        isTesting = true
+        testResult = nil
+
+        Task {
+            let endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\(trimmed)"
+            guard let url = URL(string: endpoint) else {
+                await MainActor.run {
+                    self.isTesting = false
+                    self.isSuccess = false
+                    self.testResult = "Invalid URL"
+                }
+                return
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let body: [String: Any] = [
+                "contents": [
+                    ["role": "user", "parts": [["text": "Say hello in one word."]]]
+                ]
+            ]
+
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: body)
+                let (data, response) = try await URLSession.shared.data(for: request)
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 500
+
+                await MainActor.run {
+                    self.isTesting = false
+                    if statusCode == 200 {
+                        self.isSuccess = true
+                        self.isMockMode = false
+                        self.testResult = "Connected successfully to Gemini Flash!"
+                    } else {
+                        self.isSuccess = false
+                        let json = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])
+                        let errorMsg = (json?["error"] as? [String: Any])?["message"] as? String ?? "HTTP \(statusCode)"
+                        self.testResult = "Error: \(errorMsg)"
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.isTesting = false
+                    self.isSuccess = false
+                    self.testResult = "Connection failed: \(error.localizedDescription)"
                 }
             }
         }
