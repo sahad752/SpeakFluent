@@ -42,15 +42,15 @@ public final class ConversationTurnViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     public init(
-        speechRecognizer: SpeechRecognizer = SpeechRecognizer(),
-        ttsService: TextToSpeechService = TextToSpeechService(),
-        llmService: LLMServiceProtocol = GeminiLLMService(),
-        webSocketClient: WebSocketStreamingClient = WebSocketStreamingClient()
+        speechRecognizer: SpeechRecognizer? = nil,
+        ttsService: TextToSpeechService? = nil,
+        llmService: LLMServiceProtocol? = nil,
+        webSocketClient: WebSocketStreamingClient? = nil
     ) {
-        self.speechRecognizer = speechRecognizer
-        self.ttsService = ttsService
-        self.llmService = llmService
-        self.webSocketClient = webSocketClient
+        self.speechRecognizer = speechRecognizer ?? SpeechRecognizer()
+        self.ttsService = ttsService ?? TextToSpeechService()
+        self.llmService = llmService ?? GeminiLLMService()
+        self.webSocketClient = webSocketClient ?? WebSocketStreamingClient()
 
         setupInitialGreeting()
         bindRecognizer()

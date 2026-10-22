@@ -42,12 +42,12 @@ public final class CoachViewModel: ObservableObject {
 
     public init(
         initialExercise: PronunciationExercise = PronunciationExercise.sampleExercises[0],
-        speechRecognizer: SpeechRecognizer = SpeechRecognizer(),
-        ttsService: TextToSpeechService = TextToSpeechService()
+        speechRecognizer: SpeechRecognizer? = nil,
+        ttsService: TextToSpeechService? = nil
     ) {
         self.currentExercise = initialExercise
-        self.speechRecognizer = speechRecognizer
-        self.ttsService = ttsService
+        self.speechRecognizer = speechRecognizer ?? SpeechRecognizer()
+        self.ttsService = ttsService ?? TextToSpeechService()
 
         bindRecognizer()
     }
