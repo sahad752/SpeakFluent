@@ -109,16 +109,16 @@ public final class SpeechRecognizer: ObservableObject {
 
             if let result = result {
                 let text = result.bestTranscription.formattedString
-                Task { @MainActor in
-                    self.transcript = text
+                Task { @MainActor [weak self] in
+                    self?.transcript = text
                 }
             }
 
             if let error = error {
-                Task { @MainActor in
+                Task { @MainActor [weak self] in
                     let nsError = error as NSError
                     if nsError.domain != "kAFAssistantErrorDomain" || nsError.code != 216 {
-                        self.errorMessage = error.localizedDescription
+                        self?.errorMessage = error.localizedDescription
                     }
                 }
             }
@@ -169,11 +169,10 @@ public final class SpeechRecognizer: ObservableObject {
         let rms = sqrt(meanSquare)
         let normalized = min(max(rms * 12.0, 0.0), 1.0)
 
-        // Throttle UI update dispatch to ~30Hz (0.033s) to prevent main cooperative queue congestion
-        let now = CACurrentMediaTime()
-        guard now - lastLevelUpdateTime >= 0.033 else { return }
-
-        Task { @MainActor in
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
+            let now = CACurrentMediaTime()
+            guard now - self.lastLevelUpdateTime >= 0.033 else { return }
             self.lastLevelUpdateTime = now
             self.audioLevel = (self.audioLevel * 0.4) + (normalized * 0.6)
         }

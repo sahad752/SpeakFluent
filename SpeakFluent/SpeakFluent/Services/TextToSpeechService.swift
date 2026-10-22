@@ -78,22 +78,22 @@ public final class TextToSpeechService: NSObject, ObservableObject, AVSpeechSynt
 
     // MARK: - AVSpeechSynthesizerDelegate
     nonisolated public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        Task { @MainActor in
-            self.currentSpokenRange = characterRange
+        Task { @MainActor [weak self] in
+            self?.currentSpokenRange = characterRange
         }
     }
 
     nonisolated public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor in
-            self.isSpeaking = false
-            self.currentSpokenRange = nil
+        Task { @MainActor [weak self] in
+            self?.isSpeaking = false
+            self?.currentSpokenRange = nil
         }
     }
 
     nonisolated public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor in
-            self.isSpeaking = false
-            self.currentSpokenRange = nil
+        Task { @MainActor [weak self] in
+            self?.isSpeaking = false
+            self?.currentSpokenRange = nil
         }
     }
 }
