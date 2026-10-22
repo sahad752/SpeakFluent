@@ -15,7 +15,7 @@ public struct ContentView: View {
                 viewModel: conversationViewModel
             )
             .tabItem {
-                Label("AI Voice", systemImage: "bubble.left.and.sparkles.fill")
+                Label("AI Voice", systemImage: "sparkles")
             }
             .tag(0)
 
