@@ -213,7 +213,7 @@ public struct ExerciseListView: View {
     private func exerciseRow(_ exercise: PronunciationExercise) -> some View {
         Button(action: {
             coachViewModel.setExercise(exercise)
-            selectedTab = 0 // Switch to Coach tab
+            selectedTab = 1 // Switch to Pronunciation Coach tab
         }) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
