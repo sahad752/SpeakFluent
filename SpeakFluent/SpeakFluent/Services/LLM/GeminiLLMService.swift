@@ -18,7 +18,7 @@ public final class GeminiLLMService: LLMServiceProtocol {
             return generateMockEvaluation(history: history, userSpeech: userSpeech)
         }
 
-        let endpoint = "\(config.customEndpoint)/models/\(config.modelName):generateContent?key=\(trimmedKey)"
+        let endpoint = "\(config.customEndpoint)/models/\(config.cleanModelName):generateContent?key=\(trimmedKey)"
         guard let url = URL(string: endpoint) else {
             throw URLError(.badURL)
         }
@@ -64,7 +64,7 @@ public final class GeminiLLMService: LLMServiceProtocol {
                 }
 
                 do {
-                    let endpoint = "\(self.config.customEndpoint)/models/\(self.config.modelName):streamGenerateContent?alt=sse&key=\(trimmedKey)"
+                    let endpoint = "\(self.config.customEndpoint)/models/\(self.config.cleanModelName):streamGenerateContent?alt=sse&key=\(trimmedKey)"
                     guard let url = URL(string: endpoint) else {
                         continuation.finish(throwing: URLError(.badURL))
                         return

@@ -359,6 +359,7 @@ public struct ConversationTurnView: View {
 private struct LLMSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var apiKey: String = LLMConfig.shared.apiKey
+    @State private var selectedModel: String = LLMConfig.shared.cleanModelName
     @State private var isMockMode: Bool = LLMConfig.shared.isMockModeEnabled
     @State private var isTesting: Bool = false
     @State private var testResult: String?
@@ -369,7 +370,7 @@ private struct LLMSettingsSheet: View {
             Form {
                 Section(
                     header: Text("LLM API Configuration"),
-                    footer: Text("Enter a Google Gemini API key from aistudio.google.com. When a key is saved, Demo Mode is automatically disabled to connect live to Gemini Flash.")
+                    footer: Text("Enter a Google Gemini API key from aistudio.google.com. Tapping 'Test' automatically discovers the latest active model provisioned for your key.")
                 ) {
                     SecureField("Gemini API Key", text: $apiKey)
                         .autocorrectionDisabled()
@@ -389,7 +390,7 @@ private struct LLMSettingsSheet: View {
                             } else {
                                 Image(systemName: "network")
                             }
-                            Text(isTesting ? "Testing Connection..." : "Test Gemini API Connection")
+                            Text(isTesting ? "Discovering Models..." : "Test Gemini API Connection")
                         }
                     }
                     .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isTesting)
@@ -407,10 +408,11 @@ private struct LLMSettingsSheet: View {
 
                 Section(header: Text("Pipeline Architecture")) {
                     HStack {
-                        Text("LLM Model")
+                        Text("Active Model")
                         Spacer()
-                        Text("gemini-1.5-flash")
-                            .foregroundColor(.secondary)
+                        Text(selectedModel)
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(.blue)
                     }
 
                     HStack {
@@ -437,6 +439,7 @@ private struct LLMSettingsSheet: View {
                         var conf = LLMConfig.shared
                         let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
                         conf.apiKey = trimmed
+                        conf.modelName = selectedModel
                         if trimmed.isEmpty {
                             conf.isMockModeEnabled = true
                         } else {
@@ -458,23 +461,57 @@ private struct LLMSettingsSheet: View {
         testResult = nil
 
         Task {
-            let endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\(trimmed)"
-            guard let url = URL(string: endpoint) else {
-                await MainActor.run {
-                    self.isTesting = false
-                    self.isSuccess = false
-                    self.testResult = "Invalid URL"
-                }
+            // Step 1: Query ListModels to find active models supported by user's key
+            let listUrlString = "https://generativelanguage.googleapis.com/v1beta/models?key=\(trimmed)"
+            guard let listUrl = URL(string: listUrlString) else {
+                await updateTestStatus(success: false, message: "Invalid URL")
                 return
             }
 
-            var request = URLRequest(url: url)
+            var activeModel = self.selectedModel
+            do {
+                let (listData, listResponse) = try await URLSession.shared.data(from: listUrl)
+                let statusCode = (listResponse as? HTTPURLResponse)?.statusCode ?? 500
+
+                if statusCode == 200,
+                   let json = try? JSONSerialization.jsonObject(with: listData) as? [String: Any],
+                   let modelsArray = json["models"] as? [[String: Any]] {
+
+                    // Filter models that support generateContent
+                    let contentModels = modelsArray.compactMap { dict -> String? in
+                        guard let name = dict["name"] as? String,
+                              let methods = dict["supportedGenerationMethods"] as? [String],
+                              methods.contains("generateContent") else {
+                            return nil
+                        }
+                        return name.hasPrefix("models/") ? String(name.dropFirst(7)) : name
+                    }
+
+                    // Choose preferred flash model (e.g. 2.5, 2.0, 1.5, or first available)
+                    if let bestFlash = contentModels.first(where: { $0.contains("flash") }) {
+                        activeModel = bestFlash
+                    } else if let first = contentModels.first {
+                        activeModel = first
+                    }
+                }
+            } catch {
+                print("List models lookup warning: \(error.localizedDescription)")
+            }
+
+            // Step 2: Test generateContent on the selected model
+            let generateEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/\(activeModel):generateContent?key=\(trimmed)"
+            guard let generateUrl = URL(string: generateEndpoint) else {
+                await updateTestStatus(success: false, message: "Invalid generateContent URL")
+                return
+            }
+
+            var request = URLRequest(url: generateUrl)
             request.httpMethod = "POST"
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
             let body: [String: Any] = [
                 "contents": [
-                    ["role": "user", "parts": [["text": "Say hello in one word."]]]
+                    ["role": "user", "parts": [["text": "Say 'hello' in one word."]]]
                 ]
             ]
 
@@ -483,26 +520,31 @@ private struct LLMSettingsSheet: View {
                 let (data, response) = try await URLSession.shared.data(for: request)
                 let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 500
 
-                await MainActor.run {
-                    self.isTesting = false
-                    if statusCode == 200 {
+                if statusCode == 200 {
+                    await MainActor.run {
+                        self.isTesting = false
                         self.isSuccess = true
                         self.isMockMode = false
-                        self.testResult = "Connected successfully to Gemini Flash!"
-                    } else {
-                        self.isSuccess = false
-                        let json = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])
-                        let errorMsg = (json?["error"] as? [String: Any])?["message"] as? String ?? "HTTP \(statusCode)"
-                        self.testResult = "Error: \(errorMsg)"
+                        self.selectedModel = activeModel
+                        LLMConfig.shared.modelName = activeModel
+                        self.testResult = "Connected to \(activeModel)!"
                     }
+                } else {
+                    let json = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])
+                    let errorMsg = (json?["error"] as? [String: Any])?["message"] as? String ?? "HTTP \(statusCode)"
+                    await updateTestStatus(success: false, message: "Error: \(errorMsg)")
                 }
             } catch {
-                await MainActor.run {
-                    self.isTesting = false
-                    self.isSuccess = false
-                    self.testResult = "Connection failed: \(error.localizedDescription)"
-                }
+                await updateTestStatus(success: false, message: "Connection error: \(error.localizedDescription)")
             }
+        }
+    }
+
+    private func updateTestStatus(success: Bool, message: String) async {
+        await MainActor.run {
+            self.isTesting = false
+            self.isSuccess = success
+            self.testResult = message
         }
     }
 }
