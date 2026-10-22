@@ -1,0 +1,446 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+/* Begin PBXBuildFile section */
+		F1E70F9A2C1E1722770960E0 /* SpeakFluentApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C22A557A2D85AC293CB352 /* SpeakFluentApp.swift */; };
+		6AEDB62A58548C976813A1CA /* PronunciationExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD5AA8C62B7C068C6FDA49A /* PronunciationExercise.swift */; };
+		BF1E5387CE15066E9A5C78C3 /* SpeechAnalysisResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE86CE7BAB0C931BD25F480 /* SpeechAnalysisResult.swift */; };
+		2C5E46C86FB1DFAB34A1AEEE /* UserProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B6E532F2299FD10DB711EF /* UserProgress.swift */; };
+		86BC2A8D39BB5B447473138B /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A83690621EC88CC6BFE0726 /* SpeechRecognizer.swift */; };
+		FB1EF9EDF30BB1DECA8D7976 /* TextToSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B2439FD5A6E24026FBA066 /* TextToSpeechService.swift */; };
+		7A2DDE9F22E56CF54A792180 /* PronunciationEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A546B709A32438302780701 /* PronunciationEvaluator.swift */; };
+		37FC33B7D71FA619E04A6031 /* LLMStructuredOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0433B9393B0ED9CDB04D11B4 /* LLMStructuredOutput.swift */; };
+		6A47B17A690778506F57F6BB /* LLMConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1577E28034A875E7D980239E /* LLMConfig.swift */; };
+		0AD5239E1C5631BEC57060FE /* LLMServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A52B4E8D5D053B21B8666 /* LLMServiceProtocol.swift */; };
+		0BFDA74AA7CDC4B2E2A72BB9 /* GeminiLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0046F57879AD36F3DCC4EC7 /* GeminiLLMService.swift */; };
+		84A8AAEE4873A4D1215E6673 /* WebSocketStreamingClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54ECA5A86D533B2D6CDA5D26 /* WebSocketStreamingClient.swift */; };
+		9ABC48E9DE7B43238E20165D /* CoachViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E46484B03D97D8A4722E4B4 /* CoachViewModel.swift */; };
+		0C07F46EE20B7542D946104B /* PracticeHubViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C5206B2DA6CA67C7FD5F277 /* PracticeHubViewModel.swift */; };
+		6AA8C4594BA70220595628C5 /* ProgressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74BFC4275F3A53934897F83 /* ProgressViewModel.swift */; };
+		E82EE245D8FB949AFDD07A3D /* ConversationTurnViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D129189C4A286E8626954E03 /* ConversationTurnViewModel.swift */; };
+		BEC8848C299C226057989BC4 /* WaveformVisualizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BA9619598EA88B5F3B88DE /* WaveformVisualizer.swift */; };
+		46F65812E6DB9702269E6E6E /* ScoreGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47E58009A3958DB6543832F /* ScoreGaugeView.swift */; };
+		FC91108FBA592E2BEBD18980 /* WordScorePill.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADE5AC587BFE6C3630365F7A /* WordScorePill.swift */; };
+		D159794DEE513B7D69C8ED35 /* CategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35C2A51C2C96369CEF3F609 /* CategoryCard.swift */; };
+		891EA19D6926B1C3E4DC1DA3 /* PronunciationScoreSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7037ED9415AFA5C90F938587 /* PronunciationScoreSheet.swift */; };
+		DB43F070E81CDE092BB1BEE4 /* CoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A590359AF37260B700A40 /* CoachView.swift */; };
+		84F1EE151B6EE060D434C8CE /* ExerciseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4F5AB512F9C4B703855245 /* ExerciseListView.swift */; };
+		BBE7AB8056BE895AA62B5F8B /* DailyStreakView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5012FE185E1EC81BF209B8BB /* DailyStreakView.swift */; };
+		1ED9AE877F6B92AE3A311987 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5741FF14DC867C2E6D83CD2B /* SettingsView.swift */; };
+		CB8CC1498CD14A71A0EC4147 /* ConversationTurnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1004A271E1C2174DF0B1F365 /* ConversationTurnView.swift */; };
+		75628E832B173A79A78C0748 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AE7689DAB282C5BCC5B174 /* ContentView.swift */; };
+		8C6175E7D4401E660D1F31DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B16A58646BB87EB90D038977 /* Assets.xcassets */; };
+		0C64411211FAA3F9A6EEF303 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D96B3F695CA234137E42BDB /* Preview Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		637CB36288FDB7E665BBBCEE /* SpeakFluent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeakFluent.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4C22A557A2D85AC293CB352 /* SpeakFluentApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SpeakFluentApp.swift"; sourceTree = "<group>"; };
+		6CD5AA8C62B7C068C6FDA49A /* PronunciationExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PronunciationExercise.swift"; sourceTree = "<group>"; };
+		FDE86CE7BAB0C931BD25F480 /* SpeechAnalysisResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SpeechAnalysisResult.swift"; sourceTree = "<group>"; };
+		B1B6E532F2299FD10DB711EF /* UserProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserProgress.swift"; sourceTree = "<group>"; };
+		6A83690621EC88CC6BFE0726 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SpeechRecognizer.swift"; sourceTree = "<group>"; };
+		13B2439FD5A6E24026FBA066 /* TextToSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextToSpeechService.swift"; sourceTree = "<group>"; };
+		7A546B709A32438302780701 /* PronunciationEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PronunciationEvaluator.swift"; sourceTree = "<group>"; };
+		0433B9393B0ED9CDB04D11B4 /* LLMStructuredOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LLMStructuredOutput.swift"; sourceTree = "<group>"; };
+		1577E28034A875E7D980239E /* LLMConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LLMConfig.swift"; sourceTree = "<group>"; };
+		633A52B4E8D5D053B21B8666 /* LLMServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LLMServiceProtocol.swift"; sourceTree = "<group>"; };
+		C0046F57879AD36F3DCC4EC7 /* GeminiLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeminiLLMService.swift"; sourceTree = "<group>"; };
+		54ECA5A86D533B2D6CDA5D26 /* WebSocketStreamingClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebSocketStreamingClient.swift"; sourceTree = "<group>"; };
+		8E46484B03D97D8A4722E4B4 /* CoachViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoachViewModel.swift"; sourceTree = "<group>"; };
+		8C5206B2DA6CA67C7FD5F277 /* PracticeHubViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PracticeHubViewModel.swift"; sourceTree = "<group>"; };
+		C74BFC4275F3A53934897F83 /* ProgressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProgressViewModel.swift"; sourceTree = "<group>"; };
+		D129189C4A286E8626954E03 /* ConversationTurnViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConversationTurnViewModel.swift"; sourceTree = "<group>"; };
+		D0BA9619598EA88B5F3B88DE /* WaveformVisualizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WaveformVisualizer.swift"; sourceTree = "<group>"; };
+		B47E58009A3958DB6543832F /* ScoreGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScoreGaugeView.swift"; sourceTree = "<group>"; };
+		ADE5AC587BFE6C3630365F7A /* WordScorePill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WordScorePill.swift"; sourceTree = "<group>"; };
+		B35C2A51C2C96369CEF3F609 /* CategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CategoryCard.swift"; sourceTree = "<group>"; };
+		7037ED9415AFA5C90F938587 /* PronunciationScoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PronunciationScoreSheet.swift"; sourceTree = "<group>"; };
+		D72A590359AF37260B700A40 /* CoachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoachView.swift"; sourceTree = "<group>"; };
+		7F4F5AB512F9C4B703855245 /* ExerciseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExerciseListView.swift"; sourceTree = "<group>"; };
+		5012FE185E1EC81BF209B8BB /* DailyStreakView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DailyStreakView.swift"; sourceTree = "<group>"; };
+		5741FF14DC867C2E6D83CD2B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		1004A271E1C2174DF0B1F365 /* ConversationTurnView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConversationTurnView.swift"; sourceTree = "<group>"; };
+		93AE7689DAB282C5BCC5B174 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
+		B16A58646BB87EB90D038977 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets.xcassets"; sourceTree = "<group>"; };
+		7D96B3F695CA234137E42BDB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5E535005B8A1CC820B1ED620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B1D5B1D2C2D940951F5E975D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07FBF3BBA269EE8B7AC9D7DA = {
+			isa = PBXGroup;
+			children = (
+				124DBB5D3E3DA8357859116E /* SpeakFluent */,
+				2AD177BF610FA46CBB5A3CFE /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2AD177BF610FA46CBB5A3CFE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				637CB36288FDB7E665BBBCEE /* SpeakFluent.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6917DF3F5DBC679DAF2A7549 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6CD5AA8C62B7C068C6FDA49A /* PronunciationExercise.swift */,
+				FDE86CE7BAB0C931BD25F480 /* SpeechAnalysisResult.swift */,
+				B1B6E532F2299FD10DB711EF /* UserProgress.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		640784ABDBBDE8BEF156071C /* LLM */ = {
+			isa = PBXGroup;
+			children = (
+				0433B9393B0ED9CDB04D11B4 /* LLMStructuredOutput.swift */,
+				1577E28034A875E7D980239E /* LLMConfig.swift */,
+				633A52B4E8D5D053B21B8666 /* LLMServiceProtocol.swift */,
+				C0046F57879AD36F3DCC4EC7 /* GeminiLLMService.swift */,
+				54ECA5A86D533B2D6CDA5D26 /* WebSocketStreamingClient.swift */,
+			);
+			path = LLM;
+			sourceTree = "<group>";
+		};
+		7DE4112B944D7ABFF4F6BAA1 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				640784ABDBBDE8BEF156071C /* LLM */,
+				6A83690621EC88CC6BFE0726 /* SpeechRecognizer.swift */,
+				13B2439FD5A6E24026FBA066 /* TextToSpeechService.swift */,
+				7A546B709A32438302780701 /* PronunciationEvaluator.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C9AEE5F2CE2CEF87166E5642 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				8E46484B03D97D8A4722E4B4 /* CoachViewModel.swift */,
+				8C5206B2DA6CA67C7FD5F277 /* PracticeHubViewModel.swift */,
+				C74BFC4275F3A53934897F83 /* ProgressViewModel.swift */,
+				D129189C4A286E8626954E03 /* ConversationTurnViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E8FA0AF5CBD9CDC177FB8F89 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				D0BA9619598EA88B5F3B88DE /* WaveformVisualizer.swift */,
+				B47E58009A3958DB6543832F /* ScoreGaugeView.swift */,
+				ADE5AC587BFE6C3630365F7A /* WordScorePill.swift */,
+				B35C2A51C2C96369CEF3F609 /* CategoryCard.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		CD33F97DFB55B9F0865EC4CD /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E8FA0AF5CBD9CDC177FB8F89 /* Components */,
+				7037ED9415AFA5C90F938587 /* PronunciationScoreSheet.swift */,
+				D72A590359AF37260B700A40 /* CoachView.swift */,
+				7F4F5AB512F9C4B703855245 /* ExerciseListView.swift */,
+				5012FE185E1EC81BF209B8BB /* DailyStreakView.swift */,
+				5741FF14DC867C2E6D83CD2B /* SettingsView.swift */,
+				1004A271E1C2174DF0B1F365 /* ConversationTurnView.swift */,
+				93AE7689DAB282C5BCC5B174 /* ContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C326A28B3B54AF06D94FD281 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				7D96B3F695CA234137E42BDB /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		124DBB5D3E3DA8357859116E /* SpeakFluent */ = {
+			isa = PBXGroup;
+			children = (
+				F4C22A557A2D85AC293CB352 /* SpeakFluentApp.swift */,
+				6917DF3F5DBC679DAF2A7549 /* Models */,
+				7DE4112B944D7ABFF4F6BAA1 /* Services */,
+				C9AEE5F2CE2CEF87166E5642 /* ViewModels */,
+				CD33F97DFB55B9F0865EC4CD /* Views */,
+				B16A58646BB87EB90D038977 /* Assets.xcassets */,
+				5E535005B8A1CC820B1ED620 /* Info.plist */,
+				C326A28B3B54AF06D94FD281 /* Preview Content */,
+			);
+			path = SpeakFluent;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DBF2422B31749E3C1E5F6376 /* SpeakFluent */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 501AFEEEFACAB1A4EA3D2FF9 /* Build configuration list for PBXNativeTarget "SpeakFluent" */;
+			buildPhases = (
+				D8648D9AD9321C552CAEE4A6 /* Sources */,
+				B1D5B1D2C2D940951F5E975D /* Frameworks */,
+				07A87F574592332AB7520435 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SpeakFluent;
+			productName = SpeakFluent;
+			productReference = 637CB36288FDB7E665BBBCEE /* SpeakFluent.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F0D995382A86901A66466D6A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					DBF2422B31749E3C1E5F6376 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = D81FE9F373BFE2E56BC37D96 /* Build configuration list for PBXProject "SpeakFluent" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 07FBF3BBA269EE8B7AC9D7DA;
+			productRefGroup = 2AD177BF610FA46CBB5A3CFE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DBF2422B31749E3C1E5F6376 /* SpeakFluent */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		07A87F574592332AB7520435 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8C6175E7D4401E660D1F31DF /* Assets.xcassets in Resources */,
+				0C64411211FAA3F9A6EEF303 /* Preview Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D8648D9AD9321C552CAEE4A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1E70F9A2C1E1722770960E0 /* SpeakFluentApp.swift in Sources */,
+				6AEDB62A58548C976813A1CA /* PronunciationExercise.swift in Sources */,
+				BF1E5387CE15066E9A5C78C3 /* SpeechAnalysisResult.swift in Sources */,
+				2C5E46C86FB1DFAB34A1AEEE /* UserProgress.swift in Sources */,
+				86BC2A8D39BB5B447473138B /* SpeechRecognizer.swift in Sources */,
+				FB1EF9EDF30BB1DECA8D7976 /* TextToSpeechService.swift in Sources */,
+				7A2DDE9F22E56CF54A792180 /* PronunciationEvaluator.swift in Sources */,
+				37FC33B7D71FA619E04A6031 /* LLMStructuredOutput.swift in Sources */,
+				6A47B17A690778506F57F6BB /* LLMConfig.swift in Sources */,
+				0AD5239E1C5631BEC57060FE /* LLMServiceProtocol.swift in Sources */,
+				0BFDA74AA7CDC4B2E2A72BB9 /* GeminiLLMService.swift in Sources */,
+				84A8AAEE4873A4D1215E6673 /* WebSocketStreamingClient.swift in Sources */,
+				9ABC48E9DE7B43238E20165D /* CoachViewModel.swift in Sources */,
+				0C07F46EE20B7542D946104B /* PracticeHubViewModel.swift in Sources */,
+				6AA8C4594BA70220595628C5 /* ProgressViewModel.swift in Sources */,
+				E82EE245D8FB949AFDD07A3D /* ConversationTurnViewModel.swift in Sources */,
+				BEC8848C299C226057989BC4 /* WaveformVisualizer.swift in Sources */,
+				46F65812E6DB9702269E6E6E /* ScoreGaugeView.swift in Sources */,
+				FC91108FBA592E2BEBD18980 /* WordScorePill.swift in Sources */,
+				D159794DEE513B7D69C8ED35 /* CategoryCard.swift in Sources */,
+				891EA19D6926B1C3E4DC1DA3 /* PronunciationScoreSheet.swift in Sources */,
+				DB43F070E81CDE092BB1BEE4 /* CoachView.swift in Sources */,
+				84F1EE151B6EE060D434C8CE /* ExerciseListView.swift in Sources */,
+				BBE7AB8056BE895AA62B5F8B /* DailyStreakView.swift in Sources */,
+				1ED9AE877F6B92AE3A311987 /* SettingsView.swift in Sources */,
+				CB8CC1498CD14A71A0EC4147 /* ConversationTurnView.swift in Sources */,
+				75628E832B173A79A78C0748 /* ContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D31B49B544228C8800133BDE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C008A84695D05AC9976B830B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = "wholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8D5CA870286FF8CC37A6A75E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = ""SpeakFluent/Preview Content"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SpeakFluent/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SpeakFluent;
+				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.speakfluent.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1399B497BBDF91A9FBB6F5A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = ""SpeakFluent/Preview Content"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SpeakFluent/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SpeakFluent;
+				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.speakfluent.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D81FE9F373BFE2E56BC37D96 /* Build configuration list for PBXProject "SpeakFluent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D31B49B544228C8800133BDE /* Debug */,
+				C008A84695D05AC9976B830B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		501AFEEEFACAB1A4EA3D2FF9 /* Build configuration list for PBXNativeTarget "SpeakFluent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D5CA870286FF8CC37A6A75E /* Debug */,
+				A1399B497BBDF91A9FBB6F5A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = F0D995382A86901A66466D6A /* Project object */;
+}
