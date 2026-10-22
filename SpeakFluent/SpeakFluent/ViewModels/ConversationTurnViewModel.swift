@@ -152,7 +152,7 @@ public final class ConversationTurnViewModel: ObservableObject {
     // MARK: - Ultra-Low Latency Conversational Round-Trip
     private func executeConversationalRoundTrip(userSpeech: String) async {
         do {
-            // Step 1: Request structured LLM evaluation and reply
+            // Step 1: Request structured LLM evaluation and reply in one fast call
             let (evaluation, replyText) = try await llmService.evaluateAndRespond(
                 history: conversationHistory,
                 userSpeech: userSpeech
@@ -165,33 +165,70 @@ public final class ConversationTurnViewModel: ObservableObject {
                 conversationHistory[lastIndex].evaluation = evaluation
             }
 
-            // Step 2: Stream tokens dynamically into UI for low-latency visual feedback
+            // Extract ONLY the clean conversational message to speak and display (never raw JSON)
+            let rawCandidate = replyText.isEmpty ? evaluation.adaptiveFollowUpPrompt : replyText
+            let cleanMessage = cleanSpokenMessage(from: rawCandidate)
+
+            // Step 2: Stream the clean words into UI for smooth typewriter effect
             self.state = .aiStreamingResponse(partialText: "")
             self.streamingAIText = ""
 
-            let tokenStream = llmService.streamConversationTokens(
-                history: conversationHistory,
-                userSpeech: userSpeech
-            )
-
-            for try await token in tokenStream {
-                self.streamingAIText += token
+            let words = cleanMessage.components(separatedBy: " ")
+            for word in words {
+                try? await Task.sleep(nanoseconds: 28_000_000) // 28ms per word
+                self.streamingAIText += word + " "
                 self.state = .aiStreamingResponse(partialText: self.streamingAIText)
             }
 
-            let finalReply = self.streamingAIText.isEmpty ? replyText : self.streamingAIText
+            let finalReply = cleanMessage
 
-            // Step 3: Append AI turn
+            // Step 3: Append AI turn to conversation history
             let aiTurn = ConversationTurn(speaker: .assistant, text: finalReply)
             conversationHistory.append(aiTurn)
 
-            // Step 4: Voice Turn-Taking - AI speaks the response via AVFoundation TTS
+            // Step 4: Voice Turn-Taking - AI speaks ONLY the natural spoken sentence
             self.state = .aiSpeaking(fullText: finalReply)
             ttsService.speak(text: finalReply)
 
         } catch {
             state = .error("LLM evaluation failed: \(error.localizedDescription)")
         }
+    }
+
+    private func cleanSpokenMessage(from raw: String) -> String {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Strip markdown code fences if present
+        if text.hasPrefix("```") {
+            let lines = text.components(separatedBy: .newlines)
+            let filtered = lines.filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("```") }
+            text = filtered.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        // If the string contains a raw JSON payload, extract the conversational follow-up
+        if text.contains("{") && text.contains("}") {
+            if let data = text.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                if let prompt = json["adaptiveFollowUpPrompt"] as? String, !prompt.isEmpty {
+                    return prompt
+                }
+                if let reply = json["replyText"] as? String, !reply.isEmpty {
+                    return reply
+                }
+                if let feedback = json["coachFeedback"] as? String, !feedback.isEmpty {
+                    return feedback
+                }
+            }
+
+            // Regex fallback for embedded key
+            if let regex = try? NSRegularExpression(pattern: "\"adaptiveFollowUpPrompt\"\\s*:\\s*\"([^\"]+)\""),
+               let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+               let range = Range(match.range(at: 1), in: text) {
+                return String(text[range])
+            }
+        }
+
+        return text
     }
 
     public func speakTurnText(_ text: String) {

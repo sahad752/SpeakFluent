@@ -189,7 +189,7 @@ public final class GeminiLLMService: LLMServiceProtocol {
         }
 
         return [
-            "system_instruction": ["parts": [["text": LLMConfig.systemInstruction]]],
+            "system_instruction": ["parts": [["text": "You are a warm, encouraging English conversation coach. Speak naturally in plain, friendly conversational English. Do not output JSON or code."]]],
             "contents": contents,
             "generationConfig": ["temperature": 0.6]
         ]
