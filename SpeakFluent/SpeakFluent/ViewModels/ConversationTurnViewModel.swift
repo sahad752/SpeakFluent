@@ -128,6 +128,9 @@ public final class ConversationTurnViewModel: ObservableObject {
         // Add user turn to conversation history
         let userTurn = ConversationTurn(speaker: .user, text: spokenText)
         conversationHistory.append(userTurn)
+        if conversationHistory.count > 30 {
+            conversationHistory.removeFirst(conversationHistory.count - 30)
+        }
 
         state = .streamingToLLM
 

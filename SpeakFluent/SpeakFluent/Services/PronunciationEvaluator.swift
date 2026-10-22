@@ -11,12 +11,12 @@ public struct PronunciationEvaluator {
         let cleanSpokenWords = tokenize(sentence: transcribedSentence)
 
         var wordAnalyses: [WordAnalysis] = []
+        wordAnalyses.reserveCapacity(cleanTargetWords.count)
         var totalWordScore: Double = 0.0
 
         for (index, targetWord) in cleanTargetWords.enumerated() {
             let normalizedTarget = targetWord.lowercased()
 
-            // Find best matching spoken word around the corresponding position
             let spokenMatch = findBestSpokenWord(
                 target: normalizedTarget,
                 targetIndex: index,
@@ -102,7 +102,6 @@ public struct PronunciationEvaluator {
     private static func findBestSpokenWord(target: String, targetIndex: Int, spokenTokens: [String]) -> String? {
         guard !spokenTokens.isEmpty else { return nil }
 
-        // Prefer words within a sliding window around targetIndex
         let window = 2
         let lowerBound = max(0, targetIndex - window)
         let upperBound = min(spokenTokens.count - 1, targetIndex + window)
@@ -119,7 +118,6 @@ public struct PronunciationEvaluator {
             }
         }
 
-        // If nothing in window has similarity > 0.45, check all tokens as fallback
         if bestScore < 0.45 {
             for candidate in spokenTokens {
                 let sim = stringSimilarity(s1: target, s2: candidate.lowercased())
@@ -133,46 +131,48 @@ public struct PronunciationEvaluator {
         return bestScore >= 0.35 ? bestMatch : nil
     }
 
-    // MARK: - Levenshtein Distance Similarity
+    // MARK: - Space-Optimized O(N) Levenshtein Distance
+    /// Uses two flat 1D row buffers instead of an (M x N) 2D heap matrix
     public static func stringSimilarity(s1: String, s2: String) -> Double {
+        if s1 == s2 { return 1.0 }
+        if s1.isEmpty || s2.isEmpty { return 0.0 }
+
         let str1 = Array(s1)
         let str2 = Array(s2)
-
-        if str1 == str2 { return 1.0 }
-        if str1.isEmpty || str2.isEmpty { return 0.0 }
-
         let m = str1.count
         let n = str2.count
-        var matrix = Array(repeating: Array(repeating: 0, count: n + 1), count: m + 1)
 
-        for i in 0...m { matrix[i][0] = i }
-        for j in 0...n { matrix[0][j] = j }
+        var previousRow = [Int](0...n)
+        var currentRow = [Int](repeating: 0, count: n + 1)
 
         for i in 1...m {
+            currentRow[0] = i
+            let char1 = str1[i - 1]
+
             for j in 1...n {
-                let cost = (str1[i - 1] == str2[j - 1]) ? 0 : 1
-                matrix[i][j] = min(
-                    matrix[i - 1][j] + 1,       // deletion
-                    matrix[i][j - 1] + 1,       // insertion
-                    matrix[i - 1][j - 1] + cost // substitution
+                let cost = (char1 == str2[j - 1]) ? 0 : 1
+                currentRow[j] = min(
+                    previousRow[j] + 1,       // deletion
+                    currentRow[j - 1] + 1,     // insertion
+                    previousRow[j - 1] + cost  // substitution
                 )
             }
+            previousRow = currentRow
         }
 
-        let distance = Double(matrix[m][n])
+        let distance = Double(previousRow[n])
         let maxLen = Double(max(m, n))
         return max(0.0, 1.0 - (distance / maxLen))
     }
 
     private static func generatePhoneticFeedback(target: String, spoken: String) -> String {
-        // Specific phonetic checks for common English learner stumbling blocks
-        if (target.contains("th") && !spoken.contains("th")) {
+        if target.contains("th") && !spoken.contains("th") {
             return "Mind the 'th' sound: lightly touch your tongue to your front teeth."
         }
-        if (target.contains("r") && spoken.contains("l")) {
+        if target.contains("r") && spoken.contains("l") {
             return "Watch the 'r' vs 'l' contrast: don't let tongue touch palate for 'r'."
         }
-        if (target.contains("v") && spoken.contains("w")) {
+        if target.contains("v") && spoken.contains("w") {
             return "Distinguish 'v' and 'w': rest upper teeth on lower lip for 'v'."
         }
         return "Heard as '\(spoken)'. Pronounce clearly without dropping end consonants."

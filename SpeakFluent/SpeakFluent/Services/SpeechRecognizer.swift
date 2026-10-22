@@ -1,6 +1,7 @@
 import Foundation
 import Speech
 import AVFoundation
+import Accelerate
 import Combine
 
 public enum SpeechRecognizerError: LocalizedError {
@@ -30,7 +31,7 @@ public enum SpeechRecognizerError: LocalizedError {
 public final class SpeechRecognizer: ObservableObject {
     @Published public var transcript: String = ""
     @Published public var isRecording: Bool = false
-    @Published public var audioLevel: Float = 0.0 // 0.0 to 1.0 normalized
+    @Published public var audioLevel: Float = 0.0
     @Published public var errorMessage: String?
     @Published public var authorizationStatus: SFSpeechRecognizerAuthorizationStatus = .notDetermined
 
@@ -38,6 +39,9 @@ public final class SpeechRecognizer: ObservableObject {
     private var speechRecognizer: SFSpeechRecognizer?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+
+    // Performance throttle: Avoid posting to MainActor >30 times/sec
+    private var lastLevelUpdateTime: Double = 0
 
     public init(locale: Locale = Locale(identifier: "en-US")) {
         self.speechRecognizer = SFSpeechRecognizer(locale: locale)
@@ -66,7 +70,6 @@ public final class SpeechRecognizer: ObservableObject {
     }
 
     public func startRecording() throws {
-        // Cancel ongoing tasks if any
         stopRecording()
         self.errorMessage = nil
         self.transcript = ""
@@ -94,24 +97,25 @@ public final class SpeechRecognizer: ObservableObject {
         let inputNode = engine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
 
-        // Install audio tap to stream buffers and calculate audio levels
+        // Install audio tap: 1024 frames for ultra-low latency audio processing
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
-            self?.recognitionRequest?.append(buffer)
-            self?.computeAudioLevel(from: buffer)
+            guard let self = self else { return }
+            self.recognitionRequest?.append(buffer)
+            self.computeAudioLevelHardwareAccelerated(from: buffer)
         }
 
         self.recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
             guard let self = self else { return }
 
             if let result = result {
+                let text = result.bestTranscription.formattedString
                 Task { @MainActor in
-                    self.transcript = result.bestTranscription.formattedString
+                    self.transcript = text
                 }
             }
 
             if let error = error {
                 Task { @MainActor in
-                    // Only surface unexpected errors (not intentional cancellation)
                     let nsError = error as NSError
                     if nsError.domain != "kAFAssistantErrorDomain" || nsError.code != 216 {
                         self.errorMessage = error.localizedDescription
@@ -146,23 +150,31 @@ public final class SpeechRecognizer: ObservableObject {
         isRecording = false
         audioLevel = 0.0
 
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        // Release hardware audio session to save device battery
+        DispatchQueue.global(qos: .utility).async {
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        }
     }
 
-    private func computeAudioLevel(from buffer: AVAudioPCMBuffer) {
+    // MARK: - Hardware-Accelerated Audio Metering (Apple Accelerate SIMD)
+    /// Computes RMS decibels with zero heap allocations using Apple's vDSP vector hardware
+    private nonisolated func computeAudioLevelHardwareAccelerated(from buffer: AVAudioPCMBuffer) {
         guard let channelData = buffer.floatChannelData?[0] else { return }
-        let channelDataArray = Array(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
+        let frameCount = vDSP_Length(buffer.frameLength)
+        guard frameCount > 0 else { return }
 
-        var sumSquares: Float = 0
-        for sample in channelDataArray {
-            sumSquares += sample * sample
-        }
-        let rms = sqrt(sumSquares / Float(buffer.frameLength))
-        // Normalize RMS roughly to 0.0 ... 1.0
+        // Vector Mean Square calculation in AMX/NEON hardware
+        var meanSquare: Float = 0
+        vDSP_measqv(channelData, 1, &meanSquare, frameCount)
+        let rms = sqrt(meanSquare)
         let normalized = min(max(rms * 12.0, 0.0), 1.0)
 
+        // Throttle UI update dispatch to ~30Hz (0.033s) to prevent main cooperative queue congestion
+        let now = CACurrentMediaTime()
+        guard now - lastLevelUpdateTime >= 0.033 else { return }
+
         Task { @MainActor in
-            // Smooth meter transition
+            self.lastLevelUpdateTime = now
             self.audioLevel = (self.audioLevel * 0.4) + (normalized * 0.6)
         }
     }
